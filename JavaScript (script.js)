@@ -1,0 +1,50 @@
+const taskInput = document.getElementById('taskInput');
+const addTaskBtn = document.getElementById('addTaskBtn');
+const taskList = document.getElementById('taskList');
+
+let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+
+function saveAndRender() {
+    localStorage.setItem('tasks', JSON.stringify(tasks));
+    renderTasks();
+}
+
+function renderTasks(filter = 'all') {
+    taskList.innerHTML = '';
+    const filtered = tasks.filter(t => {
+        if (filter === 'active') return !t.completed;
+        if (filter === 'completed') return t.completed;
+        return true;
+    });
+
+    filtered.forEach((task, index) => {
+        const li = document.createElement('li');
+        li.innerHTML = `
+            <span class="${task.completed ? 'completed' : ''}" onclick="toggleTask(${index})">${task.text}</span>
+            <button onclick="deleteTask(${index})">Delete</button>
+        `;
+        taskList.appendChild(li);
+    });
+}
+
+addTaskBtn.onclick = () => {
+    if (taskInput.value) {
+        tasks.push({ text: taskInput.value, completed: false });
+        taskInput.value = '';
+        saveAndRender();
+    }
+};
+
+window.toggleTask = (index) => {
+    tasks[index].completed = !tasks[index].completed;
+    saveAndRender();
+};
+
+window.deleteTask = (index) => {
+    tasks.splice(index, 1);
+    saveAndRender();
+};
+
+window.filterTasks = (filter) => renderTasks(filter);
+
+renderTasks();
